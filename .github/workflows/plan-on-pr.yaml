@@ -44,7 +44,7 @@ jobs:
         run: |
           echo "::set-env name=ENVIRONMENT::production"
 
-  plan:
+  development:
     name: plan
     runs-on: ubuntu-latest
     if: ${{ env.ENVIRONMENT }} == 'development'
