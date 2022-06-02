@@ -47,13 +47,16 @@ jobs:
   development:
     name: plan
     runs-on: ubuntu-latest
+    permissions:
+      id-token: write
+      contents: read
     environment:
       name: development
       url: https://github.com
     strategy:
       fail-fast: false
       matrix:
-        path: [us-east-1, us-east-2, us-west-1, us-west-2]
+        path: [us-east-1]
 
     steps:
       - name: Checkout code
