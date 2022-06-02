@@ -22,3 +22,35 @@ jobs:
 
       - name: Run terraform fmt check
         run: terraform fmt -check -diff -recursive ./
+
+  environment:
+    name: environment
+    runs-on: ubuntu-latest
+    steps:
+      - name: Set env to development
+        if: endsWith(github.ref, '/development')
+        run: |
+          echo "::set-env name=ENVIRONMENT::development"
+
+      - name: set env to stage
+        if: endsWith(github.ref, '/stage')
+        run: |
+          echo "::set-env name=ENVIRONMENT::stage"
+
+      - name: set env to production
+        if: endsWith(github.ref, '/main')
+        run: |
+          echo "::set-env name=ENVIRONMENT::production"
+
+    plan:
+      name: plan
+      runs-on: ubuntu-latest
+      environment:
+        name: ${{ env.ENVIRONMENT }}
+        url: https://github.com
+      strategy:
+        fail-fast: false
+        matrix:
+          path:
+            - us-east-1
+            - 
