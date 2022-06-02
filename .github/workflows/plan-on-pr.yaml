@@ -32,17 +32,17 @@ jobs:
       - name: Set env to development
         if: endsWith(github.ref, '/development')
         run: |
-          echo "::set-env name=ENVIRONMENT::development"
+          echo "ENVIRONMENT=development" >> $GITHUB_ENV
 
       - name: set env to stage
         if: endsWith(github.ref, '/stage')
         run: |
-          echo "::set-env name=ENVIRONMENT::stage"
+          echo "ENVIRONMENT=stage" >> $GITHUB_ENV
 
       - name: set env to production
         if: endsWith(github.ref, '/main')
         run: |
-          echo "::set-env name=ENVIRONMENT::production"
+          echo "ENVIRONMENT=production" >> $GITHUB_ENV
 
   development:
     name: plan
