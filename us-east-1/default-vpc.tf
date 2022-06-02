@@ -34,8 +34,8 @@ provider "aws" {
 locals {
   import_date = formatdate("MM-DD-YYYY", timestamp())
   default_tags = {
-    managed_by = "Terraform"
-    is_default = "true"
+    managed_by  = "Terraform"
+    is_default  = "true"
     import_date = local.import_date
   }
 }
@@ -47,9 +47,9 @@ module "default_vpc" {
   providers = {
     aws = aws.use1
   }
-  create_vpc = false
-  manage_default_vpc = true
-  default_vpc_name = "default"
+  create_vpc                       = false
+  manage_default_vpc               = true
+  default_vpc_name                 = "default"
   default_vpc_enable_dns_hostnames = true
   tags = merge(
     local.default_tags
