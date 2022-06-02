@@ -76,7 +76,14 @@ jobs:
       - name: Initialize Terraform
         run: |
           cd ${{ matrix.path }}
-          terraform init -input=false -no-color -out=tfplan \
+          terraform init -input=false -no-color
+
+      - name: Plan Terraform
+        id: plan
+        continue-on-error: true
+        run: |
+          cd ${{ matrix.path }}
+          terraform plan -input=false -no-color -out=tfplan \
           && terraform show -no-color tfplan
 
       - name: Reformat Plan
