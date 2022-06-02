@@ -4,7 +4,7 @@ name: Plan / Test on PR
 
 on:
   pull_request:
-    branches: [main]
+    branches: [main, development, stage]
 
 jobs:
   lint:
@@ -22,3 +22,95 @@ jobs:
 
       - name: Run terraform fmt check
         run: terraform fmt -check -diff -recursive ./
+
+  environment:
+    name: environment
+    runs-on: ubuntu-latest
+    steps:
+      - name: Set env to development
+        if: endsWith(github.ref, '/development')
+        run: |
+          echo "ENVIRONMENT=development" >> $GITHUB_ENV
+
+      - name: set env to stage
+        if: endsWith(github.ref, '/stage')
+        run: |
+          echo "ENVIRONMENT=stage" >> $GITHUB_ENV
+
+      - name: set env to production
+        if: endsWith(github.ref, '/main')
+        run: |
+          echo "ENVIRONMENT=production" >> $GITHUB_ENV
+
+  development:
+    name: plan
+    runs-on: ubuntu-latest
+    permissions:
+      id-token: write
+      contents: read
+    environment:
+      name: development
+      url: https://github.com
+    strategy:
+      fail-fast: false
+      matrix:
+        path: [us-east-1]
+
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v2
+
+      - name: Configure AWS Credentials
+        uses: aws-actions/configure-aws-credentials@v1
+        with:
+          role-to-assume: ${{ secrets.AWS_ROLE_TO_ASSUME }}
+          aws-region: us-east-1
+
+      - name: Setup Terraform
+        uses: hashicorp/setup-terraform@v1
+        with:
+          cli_config_credentials_token: ${{ secrets.TF_API_TOKEN }}
+
+      - name: Initialize Terraform
+        run: |
+          cd ${{ matrix.path }}
+          terraform init -input=false -no-color
+
+      - name: Plan Terraform
+        id: plan
+        continue-on-error: true
+        run: |
+          cd ${{ matrix.path }}
+          terraform plan -input=false -no-color -out=tfplan \
+          && terraform show -no-color tfplan
+
+      - name: Reformat Plan
+        run: |
+          echo '${{ steps.plan.outputs.stdout || steps.plan.outputs.stderr }}' \
+          | sed -E 's/^([[:space:]]+)([-+])/\2\1/g' > plan.txt
+
+      - name: Put Plan in Env Var
+        run: |
+          PLAN=$(cat plan.txt)
+          echo "PLAN<<EOF" >> $GITHUB_ENV
+          echo "$PLAN" >> $GITHUB_ENV
+          echo "EOF" >> $GITHUB_ENV
+
+      - name: Post Plan to GitHub PR
+        uses: mshick/add-pr-comment@v1
+        with:
+          allow-repeats: true
+          repo-token: ${{ secrets.GH_PAT_TOKEN }}
+          repo-token-user-login: 'github-actions[bot]'
+          message: |
+            ## ${{ matrix.path }} plan
+            ```diff
+            + Green
+            - Red
+            ! Orange
+            @@ Pink @@
+            #Gray
+            ${{ env.PLAN }}
+            ```
+
+
