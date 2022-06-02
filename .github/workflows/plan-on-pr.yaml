@@ -43,7 +43,7 @@ jobs:
           echo "ENVIRONMENT=production" >> $GITHUB_ENV
 
   development:
-    name: plan
+    name: deployment environment
     runs-on: ubuntu-latest
     permissions:
       id-token: write
