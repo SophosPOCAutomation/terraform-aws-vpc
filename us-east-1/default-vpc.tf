@@ -2,7 +2,7 @@ terraform {
   cloud {
     organization = "esg_se_xdr_demo_environment"
     workspaces {
-      tags = ["us-east-1"]
+      tags = ["aws_region:us-east-1"]
     }
   }
 }
