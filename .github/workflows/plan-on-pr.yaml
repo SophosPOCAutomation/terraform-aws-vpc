@@ -46,10 +46,7 @@ jobs:
 
   development:
     name: plan
-    env:
-      ENVIRONMENT: ${{ env.ENVIRONMENT }}
     runs-on: ubuntu-latest
-    if: env.ENVIRONMENT == 'development'
     environment:
       name: development
       url: https://github.com
